@@ -1,3 +1,4 @@
+const flashcardSceneEl = document.getElementById("flashcardScene");
 const flashcardEl = document.getElementById("flashcard");
 const questionEl = document.getElementById("question");
 const answerEl = document.getElementById("answer");
@@ -10,6 +11,7 @@ const statusMessageEl = document.getElementById("statusMessage");
 let flashcards = [];
 let currentIndex = 0;
 let isFlipped = false;
+let isAnimating = false; 
 
 function updateFlipState(flipped) {
   isFlipped = flipped;
@@ -20,16 +22,17 @@ function updateFlipState(flipped) {
 function renderCard() {
   if (!flashcards.length) {
     questionEl.textContent = "Nenhum flashcard encontrado.";
-    answerEl.textContent = "Adicione cards no arquivo cards.json.";
+    answerEl.textContent = "Verifique seu cards.json ou se você está rodando um servidor local.";
     counterEl.textContent = "0 / 0";
-    toggleBtn.disabled = true;
+    // Deixei o botão de girar ativo mesmo com erro para você poder girar o card vazio!
+    toggleBtn.disabled = false;
     prevBtn.disabled = true;
     nextBtn.disabled = true;
+    updateFlipState(false);
     return;
   }
 
   const currentCard = flashcards[currentIndex];
-
   questionEl.innerHTML = currentCard.question;
   answerEl.innerHTML = currentCard.answer;
   counterEl.textContent = `${currentIndex + 1} / ${flashcards.length}`;
@@ -38,20 +41,62 @@ function renderCard() {
 }
 
 function flipCard() {
-  if (!flashcards.length) return;
+  // Impede que clique no meio da animação lateral quebre o layout
+  if (isAnimating) return;
   updateFlipState(!isFlipped);
 }
 
 function goNext() {
-  if (!flashcards.length) return;
-  currentIndex = (currentIndex + 1) % flashcards.length;
-  renderCard();
+  if (!flashcards.length || isAnimating) return;
+  isAnimating = true;
+
+  // Blindagem: se faltar o id no HTML, ele só troca o conteúdo sem animar em vez de travar
+  if (flashcardSceneEl) {
+    flashcardSceneEl.classList.add("slide-out-left");
+
+    setTimeout(() => {
+      currentIndex = (currentIndex + 1) % flashcards.length;
+      renderCard(); 
+
+      flashcardSceneEl.classList.remove("slide-out-left");
+      flashcardSceneEl.classList.add("slide-in-right");
+
+      setTimeout(() => {
+        flashcardSceneEl.classList.remove("slide-in-right");
+        isAnimating = false;
+      }, 300);
+    }, 300);
+  } else {
+    currentIndex = (currentIndex + 1) % flashcards.length;
+    renderCard();
+    isAnimating = false;
+  }
 }
 
 function goPrev() {
-  if (!flashcards.length) return;
-  currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
-  renderCard();
+  if (!flashcards.length || isAnimating) return;
+  isAnimating = true;
+
+  if (flashcardSceneEl) {
+    flashcardSceneEl.classList.add("slide-out-right");
+
+    setTimeout(() => {
+      currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+      renderCard();
+
+      flashcardSceneEl.classList.remove("slide-out-right");
+      flashcardSceneEl.classList.add("slide-in-left");
+
+      setTimeout(() => {
+        flashcardSceneEl.classList.remove("slide-in-left");
+        isAnimating = false;
+      }, 300);
+    }, 300);
+  } else {
+    currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+    renderCard();
+    isAnimating = false;
+  }
 }
 
 async function loadCards() {
@@ -82,36 +127,29 @@ async function loadCards() {
     renderCard();
   } catch (error) {
     console.error(error);
-    statusMessageEl.textContent =
-      "Erro ao carregar os flashcards. Verifique o cards.json.";
-    questionEl.textContent = "Erro ao carregar deck.";
-    answerEl.textContent = "Confira o arquivo cards.json.";
-    counterEl.textContent = "0 / 0";
-    toggleBtn.disabled = true;
-    prevBtn.disabled = true;
-    nextBtn.disabled = true;
+    statusMessageEl.textContent = "Erro ao carregar os flashcards. Verifique o console.";
+    
+    // Mostra um erro direto no cartão
+    flashcards = []; 
+    renderCard();
   }
 }
 
+// Event Listeners
 toggleBtn.addEventListener("click", flipCard);
 nextBtn.addEventListener("click", goNext);
 prevBtn.addEventListener("click", goPrev);
-
 flashcardEl.addEventListener("click", flipCard);
 
+// Controles pelo teclado
 document.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowRight") {
-    goNext();
-  }
-
-  if (event.key === "ArrowLeft") {
-    goPrev();
-  }
-
+  if (event.key === "ArrowRight") goNext();
+  if (event.key === "ArrowLeft") goPrev();
   if (event.key === " " || event.key === "Enter") {
-    event.preventDefault();
+    event.preventDefault(); 
     flipCard();
   }
 });
 
+// Inicialização
 loadCards();

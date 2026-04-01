@@ -36,6 +36,7 @@ body {
     linear-gradient(160deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
   min-height: 100vh;
   padding: 24px;
+  overflow-x: hidden;
 }
 
 button,
@@ -104,6 +105,8 @@ h1 {
 
 .flashcard-scene {
   perspective: 1600px;
+  position: relative;
+  width: 100%;
 }
 
 .flashcard {
@@ -111,7 +114,7 @@ h1 {
   width: 100%;
   min-height: 460px;
   transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
   outline: none;
 }
@@ -138,9 +141,17 @@ h1 {
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
     linear-gradient(160deg, #24324c, #2c3b58 60%, #243550);
   box-shadow: var(--shadow-lg);
-  backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   overflow: hidden;
+}
+
+.flashcard-front {
+  transform: rotateY(0deg);
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
 }
 
 .flashcard-front::before,
@@ -164,10 +175,6 @@ h1 {
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.03), transparent 30%);
   pointer-events: none;
-}
-
-.flashcard-back {
-  transform: rotateY(180deg);
 }
 
 .face-label {
@@ -235,6 +242,12 @@ h1 {
   transform: translateY(0);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-primary {
   min-width: 210px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -256,65 +269,55 @@ h1 {
   line-height: 1.5;
 }
 
+/* =========================================
+   Animações de Transição (Slide)
+   ========================================= */
+.slide-out-left {
+  animation: slideOutLeft 0.3s forwards ease-in;
+}
+.slide-in-right {
+  animation: slideInRight 0.3s forwards ease-out;
+}
+.slide-out-right {
+  animation: slideOutRight 0.3s forwards ease-in;
+}
+.slide-in-left {
+  animation: slideInLeft 0.3s forwards ease-out;
+}
+
+@keyframes slideOutLeft {
+  to { transform: translateX(-120%); opacity: 0; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutRight {
+  to { transform: translateX(120%); opacity: 0; }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 @media (max-width: 768px) {
-  body {
-    padding: 16px;
-  }
-
-  .topbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .counter-wrap {
-    justify-content: flex-start;
-  }
-
-  .flashcard {
-    min-height: 420px;
-  }
-
-  .flashcard-face {
-    padding: 20px;
-  }
-
-  .card-content {
-    font-size: clamp(1.05rem, 4.8vw, 1.35rem);
-  }
-
-  .nav {
-    flex-direction: column;
-  }
-
-  .btn-secondary,
-  .btn-primary {
-    width: 100%;
-  }
-
-  .hint {
-    font-size: 0.88rem;
-  }
+  body { padding: 16px; }
+  .topbar { flex-direction: column; align-items: stretch; }
+  .counter-wrap { justify-content: flex-start; }
+  .flashcard { min-height: 420px; }
+  .flashcard-face { padding: 20px; }
+  .card-content { font-size: clamp(1.05rem, 4.8vw, 1.35rem); }
+  .nav { flex-direction: column; }
+  .btn-secondary, .btn-primary { width: 100%; }
+  .hint { font-size: 0.88rem; }
 }
 
 @media (max-width: 420px) {
-  .flashcard {
-    min-height: 380px;
-  }
-
-  .flashcard-face {
-    padding: 16px;
-    border-radius: 20px;
-  }
-
-  .card-content {
-    padding: 4px;
-    line-height: 1.45;
-  }
+  .flashcard { min-height: 380px; }
+  .flashcard-face { padding: 16px; border-radius: 20px; }
+  .card-content { padding: 4px; line-height: 1.45; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flashcard,
-  .btn {
-    transition: none;
-  }
+  .flashcard, .btn { transition: none; }
 }
