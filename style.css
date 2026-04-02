@@ -298,6 +298,52 @@ h1 {
   line-height: 1.5;
 }
 
+/* Container do botão de aleatorizar (linha separada, centralizado) */
+.shuffle-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* Botão terciário (menos destaque que os outros) */
+.btn-tertiary {
+  appearance: none;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 700;
+
+  /* visual mais leve */
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border-2);
+
+  /* menor largura */
+  min-width: 160px;
+
+  /* transição suave */
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 120ms ease;
+}
+
+.btn-tertiary:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-color: var(--border-1);
+}
+
+.btn-tertiary:active {
+  transform: scale(0.98);
+}
+
+.btn-tertiary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   body {
     padding: 16px;
